@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - run: npm run lint
+      - run: npm test
+      - name: Pack tarball
+        run: |
+          npm pack --pack-destination .
+          cp dsh-net-proxy-*.tgz dsh-net-proxy.tgz
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dsh-net-proxy-*.tgz
+            dsh-net-proxy.tgz
