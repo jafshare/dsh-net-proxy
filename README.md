@@ -38,6 +38,7 @@ dsh plugin --profile web add github:mafeis/dsh-net-proxy
 
 ## 最近调整
 
+- **DSH 0.2.0-rc.2 兼容**：适配桌面端 `app.asar\dsh\node_modules\...` 新目录布局（旧布局仍兼容）；peerDependencies 放行 0.2.0-rc 系列，可通过 0.2.0-rc.2 的插件版本闸门。
 - **总开关语义明确**：「代理已启用」徽章只反映「启用代理」总开关；跟随模式下横幅格式统一「（跟随系统）： 地址」（地址为真实读取的系统代理），生效与否只用红/绿横幅色表达。
 - **开关即时生效**：「启用代理」「跟随系统」勾选立即应用；「保存」按钮只负责地址/端口等输入项。
 - **健壮性专项（全量代码审查，11 处）**：连接失败时流量日志条目收尾（防 2000 条熔断后日志永久失效）；配置文件坏端口/坏协议在加载期拦截并回退默认（不再每条请求报连接错）；中继背压与解压泵挂死兜底；设置页保存不再重置手改的日志配置；修复 JSON 长字符串条件 Hook 可能导致设置页白屏。
@@ -64,7 +65,7 @@ dsh plugin --profile web add github:mafeis/dsh-net-proxy
 
 ## 技术说明
 
-- **harness 代理层**：DSH ≥ 0.1.5-rc.1 起 `web_fetch` 的出口不经过 `globalThis.fetch`，由 harness 的代理策略模块 `@deepseek-ai/dsh-http-proxy` 决定走向（[#5](https://github.com/mafeis/dsh-net-proxy/issues/5)）。插件定位 harness 已加载的同一模块实例（桌面端命中 `app.asar` 内实例，CLI 布局按 argv/bare 顺序回退）同步安装策略，停用与卸载还原到安装前状态。
+- **harness 代理层**：DSH ≥ 0.1.5-rc.1 起 `web_fetch` 的出口不经过 `globalThis.fetch`，由 harness 的代理策略模块 `@deepseek-ai/dsh-http-proxy` 决定走向（[#5](https://github.com/mafeis/dsh-net-proxy/issues/5)）。插件定位 harness 已加载的同一模块实例（桌面端命中 `app.asar` 内实例，兼容 0.2.0-rc.2 起的 `app.asar\dsh\node_modules\...` 新布局与旧版 `app.asar\node_modules\...`；CLI 布局按 argv/bare 顺序回退）同步安装策略，停用与卸载还原到安装前状态。
 - **协议限制**：harness 代理层只接受 `http://` 代理 URL。协议选 `socks5` 时由本地中继桥接（v0.5.0 起），`socks5` 配置两层全覆盖；PAC 模式暂不支持自动跟随，回退手动配置并提示。
 - **隐私边界**：日志与完整内容只存内存、不落盘、不外发；TLS 隧道内容加密不可见（仅记目标与字节数）；二进制内容不存（只记类型与大小）；清空日志即彻底消失。
 - **零运行时依赖**：代理栈、中继、日志、图表全部 Node 原生模块 + 自绘实现，发布包 72.6 KB。
